@@ -4,11 +4,13 @@ const User = require("../model/user")
 const auth  = require("../middle/auth")
 const multer = require("multer")
 const sharp = require("sharp")
+const { sendEmail ,sendEmailCancaltion} = require("../email/account")
 
 router.post("/user",async (req,res)=>{
     const user = new User(req.body)
  try {
      await user.save()
+     sendEmail(user.name,user.email)
      const token = await user.generateAuthToken()
      res.status(201).send({ user, token })
 
@@ -75,9 +77,10 @@ router.patch("/user/me/:id",auth,async(req,res)=>{
  }
 })
 
-router.delete("/users/me/:id",auth,async (req,res)=>{
+router.delete("/users/me",auth,async (req,res)=>{
    try {
      await req.user.remove()
+     sendEmailCancaltion(user.name,user.email)
      res.send(req.user)
    } catch (error) {
     res.status(500).send(error)
